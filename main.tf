@@ -229,6 +229,9 @@ resource "null_resource" "backend" {
   provisioner "remote-exec" {
     inline = [
       "sudo apt update",
+      "sudo apt install -y software-properties-common",
+      "sudo add-apt-repository ppa:deadsnakes/ppa -y",
+      "sudo apt update",
       "sudo apt install -y git pkg-config python3.8 python3.8-venv python3.8-dev python3-pip build-essential default-libmysqlclient-dev software-properties-common mysql-client",
       "cd / || echo 'Missing repo directory'",
       "sudo test -d /chat_app || sudo git clone https://github.com/ARPIT226/chat_app.git"
@@ -253,13 +256,14 @@ resource "null_resource" "backend" {
       "sudo chown -R ubuntu:ubuntu /chat_app",
       "cd /chat_app",
       "python3.8 -m venv venv",
-      "bash -c 'source venv/bin/activate && pip install -r /chat_app/requirements.txt && pip install gunicorn mysqlclient'",
+      "bash -c 'source venv/bin/activate && pip install -r /chat_app/requirements.txt && pip install gunicorn mysqlclient python-dotenv'",
     ]
   }
   provisioner "remote-exec"{
     inline=[
       "cd /chat_app/fundoo",
       "grep -qxF 'from dotenv import load_dotenv' /.env || sed -i '/import os/a from dotenv import load_dotenv\\nload_dotenv(\"/.env\")' fundoo/settings.py",
+      "mysql -h ${var.db_host} -u ${var.db_user} -p${var.db_password} -e 'CREATE DATABASE IF NOT EXISTS ${var.db_name};'",
       "bash -c 'source /chat_app/venv/bin/activate && python3 manage.py makemigrations && python3 manage.py migrate'"
     ]
   }
@@ -299,6 +303,7 @@ resource "null_resource" "frontend" {
   }
   provisioner "remote-exec" {
     inline = [
+      "chmod 400 /home/ubuntu/ChatApp_key.pem",
       "sudo apt update",
       "sudo apt install nginx -y",
       "echo 'server { listen 80; server_name _; location / { proxy_pass http://${aws_instance.Backend.private_ip}:8000; } }' | sudo tee /etc/nginx/sites-available/chatapp",
