@@ -263,7 +263,7 @@ resource "null_resource" "backend" {
     inline=[
       "cd /chat_app/fundoo",
       "grep -qxF 'from dotenv import load_dotenv' /.env || sed -i '/import os/a from dotenv import load_dotenv\\nload_dotenv(\"/.env\")' fundoo/settings.py",
-      "mysql -h ${var.db_host} -u ${var.db_user} -p${var.db_password} -e 'CREATE DATABASE IF NOT EXISTS ${var.db_name};'",
+      "mysql -h ${aws_db_instance.DB.address} -u ${var.db_user} -p${var.db_password} -e 'CREATE DATABASE IF NOT EXISTS ${var.db_name};'",
       "bash -c 'source /chat_app/venv/bin/activate && python3 manage.py makemigrations && python3 manage.py migrate'"
     ]
   }
