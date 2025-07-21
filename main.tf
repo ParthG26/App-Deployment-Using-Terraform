@@ -234,7 +234,7 @@ resource "null_resource" "backend" {
       "sudo apt update",
       "sudo apt install -y git pkg-config python3.8 python3.8-venv python3.8-dev python3-pip build-essential default-libmysqlclient-dev software-properties-common mysql-client",
       "cd / || echo 'Missing repo directory'",
-      "sudo test -d /chat_app || sudo git clone https://github.com/ARPIT226/chat_app.git"
+      "sudo test -d /chat_app || sudo git clone https://github.com/ParthG26/ChatApp-Deployment-using-AWS.git"
     ]
   }
   provisioner "remote-exec" {
